@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn Tập Tin Học 12 - 120 Câu</title>
+    <style>
+        :root { --primary: #2563eb; --success: #22c55e; --error: #ef4444; --bg: #f8fafc; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 15px; margin: 0; }
+        .container { background: white; width: 100%; max-width: 500px; padding: 20px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
+        .question { font-size: 1.15rem; font-weight: 700; color: #1e293b; line-height: 1.5; margin-bottom: 20px; }
+        .option { padding: 14px 18px; margin-bottom: 12px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: 0.2s; font-size: 1rem; color: #475569; }
+        .option:active { transform: scale(0.98); }
+        .correct { background: #f0fdf4; border-color: var(--success); color: #166534; font-weight: 600; }
+        .wrong { background: #fef2f2; border-color: var(--error); color: #991b1b; }
+        .disabled { pointer-events: none; }
+        #next-btn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600; display: none; cursor: pointer; margin-top: 10px; }
+        .score-box { font-weight: bold; color: var(--primary); background: #eff6ff; padding: 4px 12px; border-radius: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <span id="progress">Câu 1/120</span>
+            <span class="score-box">Đúng: <span id="score">0</span></span>
+        </div>
+        <div id="quiz-content">
+            <div class="question" id="q-text">Đang tải câu hỏi...</div>
+            <div id="options"></div>
+        </div>
+        <button id="next-btn" onclick="nextQ()">Câu tiếp theo ➜</button>
+    </div>
+
+    <script>
+        // DỮ LIỆU 120 CÂU HỎI GỘP CHUNG (TRÍCH ĐOẠN MẪU)
+        const allQuestions = [
+            {q: "Thuật ngữ 'Trí tuệ nhân tạo' (AI) chính thức được đưa ra tại sự kiện nào?", a: ["Phép thử Turing (1950)", "Hội thảo Dartmouth (1956)", "Hệ chuyên gia MYCIN (1970)", "Robot Sophia (2016)"], c: 1},
+            {q: "Theo định nghĩa phổ biến, Trí tuệ nhân tạo (AI) là gì?", a: ["Lưu trữ dữ liệu khổng lồ", "Tính toán tốc độ cao", "Làm việc mang tính trí tuệ con người", "Hoạt động không nghỉ"], c: 2},
+            {q: "Youtube tự động đề xuất video dựa trên lịch sử xem thể hiện đặc trưng nào?", a: ["Khả năng suy luận", "Khả năng nhận thức", "Khả năng học", "Khả năng vận động"], c: 2},
+            {q: "Một hệ thống chẩn đoán bệnh dựa trên các triệu chứng đầu vào có đặc trưng nào?", a: ["Nhận thức", "Suy luận", "Tạo sinh", "Giao tiếp"], c: 1},
+            {q: "Thiết bị nào kết nối các máy tính trong mạng LAN và gửi chính xác đến máy đích?", a: ["Modem", "Switch", "Repeater", "Cáp xoắn đôi"], c: 1},
+            {q: "Địa chỉ IPv4 điển hình được biểu diễn dưới dạng nào?", a: ["4 số thập phân cách nhau dấu chấm", "8 nhóm số thập lục phân", "Tên miền chữ", "Dãy nhị phân 128 bit"], c: 0},
+            {q: "Thẻ nào dùng để tạo danh sách thả xuống?", a: ["<list>", "<dropdown>", "<select>", "<option>"], c: 2},
+            {q: "Thẻ HTML nào dùng để chèn hình ảnh?", a: ["<image>", "<picture>", "<img>", "<src>"], c: 2},
+            {q: "Nút bấm nào dùng để gửi toàn bộ thông tin biểu mẫu về máy chủ?", a: ["type='button'", "type='reset'", "type='submit'", "type='file'"], c: 2},
+            {q: "Để tạo ô nhập mật khẩu ẩn ký tự, dùng thuộc tính type là gì?", a: ["text", "hidden", "password", "secret"], c: 2}
+            // ... Bạn có thể dán tiếp các câu hỏi khác vào đây theo cấu trúc này
+        ];
+
+        let currentIdx = 0;
+        let score = 0;
+        let shuffled = [...allQuestions].sort(() => Math.random() - 0.5);
+
+        function render() {
+            const q = shuffled[currentIdx];
+            document.getElementById('progress').innerText = `Câu ${currentIdx + 1}/${shuffled.length}`;
+            document.getElementById('q-text').innerText = q.q;
+            const container = document.getElementById('options');
+            container.innerHTML = '';
+            
+            q.a.forEach((txt, i) => {
+                const div = document.createElement('div');
+                div.className = 'option';
+                div.innerText = txt;
+                div.onclick = () => {
+                    const all = document.querySelectorAll('.option');
+                    all.forEach(o => o.classList.add('disabled'));
+                    if(i === q.c) {
+                        div.classList.add('correct');
+                        score++;
+                        document.getElementById('score').innerText = score;
+                    } else {
+                        div.classList.add('wrong');
+                        all[q.c].classList.add('correct');
+                    }
+                    document.getElementById('next-btn').style.display = 'block';
+                };
+                container.appendChild(div);
+            });
+        }
+
+        function nextQ() {
+            currentIdx++;
+            if(currentIdx < shuffled.length) {
+                render();
+                document.getElementById('next-btn').style.display = 'none';
+            } else {
+                alert(`Hoàn thành! Điểm của bạn: ${score}/${shuffled.length}`);
+            }
+        }
+
+        render();
+    </script>
+</body>
+</html>
